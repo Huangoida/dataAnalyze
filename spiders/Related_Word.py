@@ -9,39 +9,20 @@ import json
 import random
 from urllib.parse import quote
 import scrapy
-from scrapy.utils.project import get_project_settings
+from dateutil import relativedelta
 
 from settings import COOKIES
 from items import RelatedWordItem
-from tools.QueryData import QueryData
+from spiders.base_spider import BaseSpider
 
-
-class RelatedWordSpider(scrapy.Spider):
+class RelatedWordSpider(BaseSpider):
     name = 'related_word'
 
     def __init__(self, *args, **kwargs):
         super(RelatedWordSpider, self).__init__(*args, **kwargs)
         self.base_url = 'http://index.baidu.com/Interface/Newwordgraph?word={}&datelist='
-        self.keywords = QueryData().get_keyword()
-        self.settings = get_project_settings()
-        self.date_range_list = self.get_time_range_list(self.settings["START_DATE"],
-                                                        self.settings["END_DATE"])
-
-    def get_time_range_list(self, startdate, enddate):
-        """
-        获取时间参数列表，以七天为间隔
-        :return: date_range_list
-        """
-        date_range_list = []
-        startdate = datetime.datetime.strptime(startdate, '%Y-%m-%d')
-        enddate = datetime.datetime.strptime(enddate, '%Y-%m-%d')
-        while 1:
-            date_range_list.append(
-                datetime.datetime.strftime(startdate, '%Y%m%d'))
-            if startdate > enddate:
-                date_range_list.pop()
-                return date_range_list
-            startdate = startdate + datetime.timedelta(days=7)
+        self.set_param_file('paramdemo.json')
+        self.set_time_split(relativedelta.relativedelta(days=7))
 
     def start_requests(self):
         for keyword in self.keywords:

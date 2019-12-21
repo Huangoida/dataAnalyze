@@ -9,36 +9,27 @@ import random
 from urllib.parse import quote
 
 import scrapy
+from dateutil import relativedelta
 
 from settings import COOKIES
 from items import SexAgeItem
-from tools.QueryData import QueryData
+from spiders.base_spider import BaseSpider
 
-date_range_list = [
-    (20180601, 20180701),
-    (20180701, 20180801),
-    (20180801, 20180901),
-    (20180901, 20181001),
-    (20181001, 20181101),
-    (20181101, 20181201),
-    (20181201, 20190101),
-]
 
-class SexAgeSpider(scrapy.Spider):
+class SexAgeSpider(BaseSpider):
     name = 'sex_age'
 
     def __init__(self, *args, **kwargs):
         super(SexAgeSpider, self).__init__(*args, **kwargs)
         self.base_url = 'https://index.baidu.com/api/SocialApi/getSocial?wordlist%5B%5D={}&startdate={}&enddate={}'
-        self.keywords = QueryData().get_keyword()
-        self.date_range_list = date_range_list
+        self.set_param_file('paramdemo.json')
+        self.set_time_split(relativedelta.relativedelta(months=1))
 
     def start_requests(self):
         for keyword in self.keywords:
             for date in self.date_range_list:
-                start_url = self.base_url.format(quote(keyword),date[0], date[1])
-                yield scrapy.Request(url=start_url,callback=self.parse,cookies=random.choice(COOKIES))
-
+                start_url = self.base_url.format(quote(keyword), date[0], date[1])
+                yield scrapy.Request(url=start_url, callback=self.parse, cookies=random.choice(COOKIES))
 
     def parse(self, response):
         result = json.loads(response.body.decode('utf-8'))
@@ -57,9 +48,6 @@ class SexAgeSpider(scrapy.Spider):
                 item["date"] = data['period']
                 yield item
             else:
-                print("数据为空"+ ":" + data['word'])
+                print("数据为空" + ":" + data['word'])
         else:
             print('没有该关键词')
-
-
-
