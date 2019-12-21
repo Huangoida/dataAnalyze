@@ -1,5 +1,6 @@
 # coding=utf-8
 
+
 class QueryData(object):
     PROVINCE_CODE = {'山东': '901', '贵州': '902', '江西': '903', '重庆': '904',
                      '内蒙古': '905', '湖北': '906', '辽宁': '907', '湖南': '908',
@@ -13,11 +14,9 @@ class QueryData(object):
 
     def get_region_id(self):
         # 查询省份ID
-        Regin_list = []
-        for i in self.PROVINCE_CODE:
-            Regin_list.append(self.PROVINCE_CODE[i])
+        return [self.PROVINCE_CODE[_id] for _id in self.PROVINCE_CODE]
 
     def get_keyword(self):
-        keywords_list = ["南昌大学","北京大学","清华大学"]
+        keywords_list = ["南昌大学", "北京大学", "清华大学"]
         return keywords_list
 
