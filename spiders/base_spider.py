@@ -16,6 +16,8 @@ class BaseSpider(scrapy.Spider):
         self.region_id_list = None
         self.date_range_list = None
 
+        self.init_base_param()
+
         # 以下操作均需要子类在初始化时操作
         # 配置参数数据源
         # self.set_param_file(filename)
@@ -25,7 +27,7 @@ class BaseSpider(scrapy.Spider):
         self.region_id_list = RegionId.get_region_id_list()
 
     def set_param_file(self, filename):
-        file = open(filename, 'r')
+        file = open(filename, 'r',encoding="utf-8")
         content = file.read()
         file.close()
         params = json.loads(content)

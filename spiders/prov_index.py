@@ -40,7 +40,7 @@ class ProvIndexSpider(BaseSpider):
                 for key, value in prov.items():
                     item['prov'] = key
                     item['prov_index'] = value
-                    yield item
+                yield item
             else:
                 print(result['data']['region'][0]['key'] + "该地区数据为空")
         else:

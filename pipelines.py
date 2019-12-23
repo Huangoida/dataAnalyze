@@ -11,7 +11,7 @@ import pymongo
 
 
 class ScrapybaiduPipeline(object):
-    collection_name = 'iphoneSexAge'
+    collection_name = 'phone_city'
 
     def __init__(self, mongo_url, mongo_db):
         self.mongo_db = mongo_db

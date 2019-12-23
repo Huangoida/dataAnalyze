@@ -22,12 +22,12 @@ class RelatedWordSpider(BaseSpider):
         super(RelatedWordSpider, self).__init__(*args, **kwargs)
         self.base_url = 'http://index.baidu.com/Interface/Newwordgraph?word={}&datelist='
         self.set_param_file('paramdemo.json')
-        self.set_time_split(relativedelta.relativedelta(days=7))
+        self.set_time_split(relativedelta.relativedelta(days=1))
 
     def start_requests(self):
         for keyword in self.keywords:
             for date in self.date_range_list:
-                start_url = self.base_url.format(quote(keyword)) + str(date)
+                start_url = self.base_url.format(quote(keyword))
                 yield scrapy.Request(url=start_url, callback=self.parse,
                                      cookies=random.choice(COOKIES), meta={'date': date})
 
@@ -37,12 +37,16 @@ class RelatedWordSpider(BaseSpider):
         date = response.meta['date']
         if result['status'] != 10002:
             if result['data']:
-                item['keyword'] = result['0']
-                item['date'] = date
-                datas = result['data'][date]
-                for i in range(len(datas)):
-                    item['related_word'], item['count'] = datas[i].split('\t')
-                    yield item
+                item['keyword']=result['word']
+                lists=[]
+                for i in result['data']:
+                    lists.append(result['data'][i])
+                related_word=[]
+                count=[]
+                for it in lists:
+                    for i in it:
+                        item['related_word'], item['count'] = i.split('\t')
+                        yield item
             else:
                 print("该关键词暂无数据")
 
