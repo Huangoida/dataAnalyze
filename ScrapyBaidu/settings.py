@@ -89,9 +89,6 @@ ITEM_PIPELINES = {
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-# 抓取起始时间与结束时间
-START_DATE = "2019-01-01"
-END_DATE = "2019-09-30"
 
 MONGO_URL = '127.0.0.1'
 MONGO_DB = 'dataAnalyze'

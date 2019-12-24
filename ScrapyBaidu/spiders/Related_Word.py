@@ -9,44 +9,25 @@ import json
 import random
 from urllib.parse import quote
 import scrapy
-from scrapy.utils.project import get_project_settings
+from dateutil import relativedelta
 
 from settings import COOKIES
 from items import RelatedWordItem
-from tools.QueryData import QueryData
+from spiders.base_spider import BaseSpider
 
-
-class RelatedWordSpider(scrapy.Spider):
+class RelatedWordSpider(BaseSpider):
     name = 'related_word'
 
     def __init__(self, *args, **kwargs):
         super(RelatedWordSpider, self).__init__(*args, **kwargs)
         self.base_url = 'http://index.baidu.com/Interface/Newwordgraph?word={}&datelist='
-        self.keywords = QueryData().get_keyword()
-        self.settings = get_project_settings()
-        self.date_range_list = self.get_time_range_list(self.settings["START_DATE"],
-                                                        self.settings["END_DATE"])
-
-    def get_time_range_list(self, startdate, enddate):
-        """
-        获取时间参数列表，以七天为间隔
-        :return: date_range_list
-        """
-        date_range_list = []
-        startdate = datetime.datetime.strptime(startdate, '%Y-%m-%d')
-        enddate = datetime.datetime.strptime(enddate, '%Y-%m-%d')
-        while 1:
-            date_range_list.append(
-                datetime.datetime.strftime(startdate, '%Y%m%d'))
-            if startdate > enddate:
-                date_range_list.pop()
-                return date_range_list
-            startdate = startdate + datetime.timedelta(days=7)
+        self.set_param_file('paramdemo.json')
+        self.set_time_split(relativedelta.relativedelta(days=1))
 
     def start_requests(self):
         for keyword in self.keywords:
             for date in self.date_range_list:
-                start_url = self.base_url.format(quote(keyword)) + str(date)
+                start_url = self.base_url.format(quote(keyword))
                 yield scrapy.Request(url=start_url, callback=self.parse,
                                      cookies=random.choice(COOKIES), meta={'date': date})
 
@@ -56,12 +37,16 @@ class RelatedWordSpider(scrapy.Spider):
         date = response.meta['date']
         if result['status'] != 10002:
             if result['data']:
-                item['keyword'] = result['0']
-                item['date'] = date
-                datas = result['data'][date]
-                for i in range(len(datas)):
-                    item['related_word'], item['count'] = datas[i].split('\t')
-                    yield item
+                item['keyword']=result['word']
+                lists=[]
+                for i in result['data']:
+                    lists.append(result['data'][i])
+                related_word=[]
+                count=[]
+                for it in lists:
+                    for i in it:
+                        item['related_word'], item['count'] = i.split('\t')
+                        yield item
             else:
                 print("该关键词暂无数据")
 

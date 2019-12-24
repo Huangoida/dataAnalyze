@@ -1,56 +1,32 @@
 # -*- coding: utf-8 -*-
 import calendar
 import datetime
+from dateutil import relativedelta
 import json
 import random
 import scrapy
-from scrapy.utils.project import get_project_settings
 
 from settings import COOKIES
 from items import CityIndexItem
-from tools.QueryData import QueryData
+from spiders.base_spider import BaseSpider
 
 
-class CityIndexSpider(scrapy.Spider):
+class CityIndexSpider(BaseSpider):
     name = 'city_index'
 
     def __init__(self, *args, **kwargs):
         super(CityIndexSpider, self).__init__(*args, **kwargs)
-        self.settings = get_project_settings()
         self.base_url = 'https://index.baidu.com/api/SearchApi/region?region={}&word={}&startDate={}&endDate={}&days="'
-        query=QueryData()
-        self.region_id = query.get_region_id()
-        # self.keywords = QueryData().get_keyword()
-        self.keywords = ["爱奇艺"]
-        self.get_time_range_list(self.settings["START_DATE"],
-                                 self.settings["END_DATE"])
 
-    def get_time_range_list(self,startdate, enddate):
-        """
-        获取时间参数列表，按月计算
-        :param startdate: 起始时间 --> str
-        :param enddate: 结束时间 --> str
-        :return: date_range_list -->list
-        """
-        date_range_list = []
-        startdate = datetime.datetime.strptime(startdate, '%Y-%m-%d')
-        enddate = datetime.datetime.strptime(enddate, '%Y-%m-%d')
-        while 1:
-            next_month = startdate + datetime.timedelta(days=calendar.monthrange(startdate.year, startdate.month)[1])
-            month_end = next_month - datetime.timedelta(days=1)
-            if month_end < enddate:
-                date_range_list.append((datetime.datetime.strftime(startdate,
-                                                                   '%Y-%m-%d'),
-                                        datetime.datetime.strftime(month_end,
-                                                                   '%Y-%m-%d')))
+        self.set_param_file('paramdemo.json')
+        self.set_time_split(relativedelta.relativedelta(months=6))
 
     def start_requests(self):
         for keyword in self.keywords:
-            for region_id in self.region_id:
-                for date in self.date_range_list:
-                    start_url = self.base_url.format(region_id, keyword, date[0], date[1])
-                    yield scrapy.Request(url=start_url, callback=self.parse,
-                                         cookies=random.choice(COOKIES),
+            for region_id in self.region_id_list:
+                for startdate, enddate in self.date_range_list:
+                    start_url = self.base_url.format(region_id, keyword, startdate, enddate)
+                    yield scrapy.Request(url=start_url, callback=self.parse, cookies=random.choice(COOKIES),
                                          meta={'region': region_id})
 
     def parse(self, response):
