@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import calendar
-import datetime
 from dateutil import relativedelta
 import json
 import random

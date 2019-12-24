@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import calendar
-import datetime
 import json
 import random
 import scrapy
